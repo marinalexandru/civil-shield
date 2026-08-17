@@ -1,0 +1,11 @@
+name: Civil shield
+version: 1.0.0
+description: Civil shield context engineering
+dependencies:
+  apm:
+    - ssh://git@git.zitec.ro:6246/zitec/ai/apm/android.git#feature/ZTCTEB-662-config-maestro-e2e-testing
+  mcp: []
+targets:
+  - antigravity
+includes: auto
+scripts: {}
