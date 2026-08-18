@@ -1,60 +1,32 @@
 package com.civilshield.designsystem
 
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+import com.savantarch.design.DsTypography
+import com.savantarch.design.FontSpec
+
+data class BaseDsTypography(
+    override val bodyLarge: FontSpec = FontSpec(fontSize = 18.0, lineHeight = 28.0),
+    override val bodyMedium: FontSpec = FontSpec(fontSize = 16.0, lineHeight = 24.0),
+    override val bodySmall: FontSpec = FontSpec(fontSize = 14.0, lineHeight = 20.0),
+    override val displayLarge: FontSpec = FontSpec(fontSize = 32.0, lineHeight = 40.0),
+    override val displayMedium: FontSpec = FontSpec(fontSize = 28.0, lineHeight = 34.0),
+    override val displaySmall: FontSpec = FontSpec(fontSize = 24.0, lineHeight = 32.0),
+    override val headlineLarge: FontSpec = FontSpec(fontSize = 32.0, lineHeight = 40.0),
+    override val headlineMedium: FontSpec = FontSpec(fontSize = 24.0, lineHeight = 32.0),
+    override val headlineSmall: FontSpec = FontSpec(fontSize = 20.0, lineHeight = 26.0),
+    override val labelLarge: FontSpec = FontSpec(fontSize = 14.0, lineHeight = 20.0),
+    override val labelMedium: FontSpec = FontSpec(fontSize = 12.0, lineHeight = 16.0),
+    override val labelSmall: FontSpec = FontSpec(fontSize = 11.0, lineHeight = 16.0),
+    override val titleLarge: FontSpec = FontSpec(fontSize = 22.0, lineHeight = 28.0),
+    override val titleMedium: FontSpec = FontSpec(fontSize = 20.0, lineHeight = 26.0),
+    override val titleSmall: FontSpec = FontSpec(fontSize = 14.0, lineHeight = 20.0)
+) : DsTypography
 
 /**
- * CivilShield Design System Typography Tokens.
+ * CivilShield AppTypography delegating to kmp-design-system DsTypography.
  */
-data class AppTypography(
-    val headlineLg: TextStyle = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
-        letterSpacing = (-0.02).sp
-    ),
-    val headlineLgMobile: TextStyle = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 28.sp,
-        lineHeight = 34.sp,
-        letterSpacing = (-0.02).sp
-    ),
-    val headlineMd: TextStyle = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp,
-        lineHeight = 32.sp
-    ),
-    val callout: TextStyle = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        lineHeight = 26.sp
-    ),
-    val bodyLg: TextStyle = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 18.sp,
-        lineHeight = 28.sp
-    ),
-    val bodyMd: TextStyle = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp
-    ),
-    val labelBold: TextStyle = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.05.sp
-    )
-)
-
-val LocalAppTypography = staticCompositionLocalOf { AppTypography() }
+class AppTypography(
+    private val base: DsTypography = BaseDsTypography(),
+    val headlineLgMobile: FontSpec = FontSpec(fontSize = 28.0, lineHeight = 34.0),
+    val callout: FontSpec = FontSpec(fontSize = 20.0, lineHeight = 26.0),
+    val labelBold: FontSpec = FontSpec(fontSize = 14.0, lineHeight = 20.0)
+) : DsTypography by base

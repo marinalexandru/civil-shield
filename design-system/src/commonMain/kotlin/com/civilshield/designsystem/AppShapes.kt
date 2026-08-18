@@ -1,19 +1,21 @@
 package com.civilshield.designsystem
 
-import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.unit.dp
+import com.savantarch.design.CornerFamily
+import com.savantarch.design.DsShapes
+import com.savantarch.design.ShapeAppearance
+
+data class BaseDsShapes(
+    override val extraSmall: ShapeAppearance = ShapeAppearance(CornerFamily.ROUNDED, 2.0),
+    override val small: ShapeAppearance = ShapeAppearance(CornerFamily.ROUNDED, 4.0),
+    override val medium: ShapeAppearance = ShapeAppearance(CornerFamily.ROUNDED, 8.0),
+    override val large: ShapeAppearance = ShapeAppearance(CornerFamily.ROUNDED, 12.0),
+    override val extraLarge: ShapeAppearance = ShapeAppearance(CornerFamily.ROUNDED, 16.0)
+) : DsShapes
 
 /**
- * CivilShield Design System Shape Tokens (Soft Geometry).
+ * CivilShield AppShapes delegating to kmp-design-system DsShapes.
  */
-data class AppShapes(
-    val sm: CornerBasedShape = RoundedCornerShape(2.dp),
-    val md: CornerBasedShape = RoundedCornerShape(4.dp),
-    val lg: CornerBasedShape = RoundedCornerShape(8.dp),
-    val xl: CornerBasedShape = RoundedCornerShape(12.dp),
-    val full: CornerBasedShape = RoundedCornerShape(9999.dp)
-)
-
-val LocalAppShapes = staticCompositionLocalOf { AppShapes() }
+class AppShapes(
+    private val base: DsShapes = BaseDsShapes(),
+    val full: ShapeAppearance = ShapeAppearance(CornerFamily.ROUNDED, 9999.0)
+) : DsShapes by base
