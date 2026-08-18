@@ -22,7 +22,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.design.system)
+            api(libs.design.system)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
