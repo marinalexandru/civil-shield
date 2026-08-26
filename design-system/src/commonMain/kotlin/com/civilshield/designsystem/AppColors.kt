@@ -49,5 +49,9 @@ class AppColors(
     val primaryFixed: Long = 0xFFD6E3FFL,
     val primaryFixedDim: Long = 0xFFB9C7E4L,
     val emergencySos: Long = 0xFFCE1126L,
-    val activeWarning: Long = 0xFFFCD116L
+    val activeWarning: Long = 0xFFFCD116L,
+    val flagBlue: Long = 0xFF002B7FL,
+    val flagYellow: Long = 0xFFFCD116L,
+    val flagRed: Long = 0xFFCE1126L,
+    val pureWhite: Long = 0xFFFFFFFFL
 ) : DsColors by base

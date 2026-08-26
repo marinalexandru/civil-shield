@@ -1,4 +1,4 @@
-package com.civil.shield.ui
+package com.civil.shield.core.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
