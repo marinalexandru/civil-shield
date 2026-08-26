@@ -35,7 +35,9 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.core)
-            // put your Multiplatform dependencies here
+            api(projects.designSystem)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.androidx.lifecycle.viewmodel)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

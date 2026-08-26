@@ -1,0 +1,17 @@
+name: Civil shield
+version: 1.0.0
+description: Civil shield context engineering
+dependencies:
+  apm:
+    - ssh://git@git.zitec.ro:6246/zitec/ai/apm/android.git#feature/ZTCTEB-662-config-maestro-e2e-testing
+  mcp:
+    - name: stitch
+      transport: http
+      registry: false
+      url: https://stitch.googleapis.com/mcp
+      headers:
+        X-Goog-Api-Key: "${STITCH_API_KEY}"
+targets:
+  - antigravity
+includes: auto
+scripts: {}
