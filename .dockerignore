@@ -3,9 +3,6 @@
 .gradle
 .idea
 .gemini
-build
-*/build
-*/*/build
 app/androidApp
 app/sharedLogic
 design-system
@@ -13,3 +10,10 @@ design-system
 local.properties
 *.apk
 *.aab
+
+# Ignore build directories except the server fat jar
+build/
+core/build/
+server/build/classes/
+server/build/kotlin/
+server/build/tmp/
