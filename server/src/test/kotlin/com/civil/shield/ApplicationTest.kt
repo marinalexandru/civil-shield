@@ -15,6 +15,25 @@ class ApplicationTest {
         }
         val response = client.get("/")
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals("Hello, Ktor!", response.bodyAsText())
+        assertEquals(sayHello("CivilShield Backend"), response.bodyAsText())
+    }
+
+    @Test
+    fun testAuthConfigEndpoint() = testApplication {
+        application {
+            module()
+        }
+        val response = client.get("/api/v1/auth/config")
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(response.bodyAsText().contains("civil-shield.eu.auth0.com"))
+    }
+
+    @Test
+    fun testProtectedUserMeEndpointUnauthorizedWithoutToken() = testApplication {
+        application {
+            module()
+        }
+        val response = client.get("/api/v1/user/me")
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 }

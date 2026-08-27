@@ -16,6 +16,8 @@ enum class AppStrings : DsStrings {
     AUTH_PROTECTED_BY,
     AUTH_TERMS,
     AUTH_PRIVACY,
+    AUTH_LOGOUT,
+    AUTH_SUCCESS_BADGE,
     LANG_RO,
     LANG_EN,
     LANG_HU;
@@ -34,6 +36,8 @@ enum class AppStrings : DsStrings {
         AUTH_PROTECTED_BY -> "PROTEJAT DE SERVICIUL DE TELECOMUNICAȚII SPECIALE"
         AUTH_TERMS -> "Termeni și Condiții"
         AUTH_PRIVACY -> "Confidențialitate"
+        AUTH_LOGOUT -> "Deconectare"
+        AUTH_SUCCESS_BADGE -> "Autentificat cu succes"
         LANG_RO -> "RO"
         LANG_EN -> "EN"
         LANG_HU -> "HU"

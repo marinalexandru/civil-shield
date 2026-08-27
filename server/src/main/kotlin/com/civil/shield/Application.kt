@@ -1,20 +1,70 @@
 package com.civil.shield
 
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import com.civil.shield.core.auth.Auth0Config
+import com.civil.shield.core.auth.UserProfileDto
+import com.civil.shield.plugins.configureSecurity
+import com.civil.shield.plugins.configureSerialization
+import io.ktor.server.application.Application
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
-        .start(wait = true)
+    embeddedServer(
+        factory = Netty,
+        port = 8080,
+        host = "0.0.0.0",
+        module = Application::module
+    ).start(wait = true)
 }
 
 fun Application.module() {
+    configureSerialization()
+    configureSecurity()
+
     routing {
         get("/") {
-            call.respondText(sayHello("Ktor"))
+            call.respondText(sayHello("CivilShield Backend"))
+        }
+
+        route("/api/v1") {
+            // Public endpoint returning Auth0 metadata
+            get("/auth/config") {
+                call.respond(
+                    mapOf(
+                        "domain" to Auth0Config.DOMAIN,
+                        "clientId" to Auth0Config.CLIENT_ID,
+                        "audience" to Auth0Config.AUDIENCE
+                    )
+                )
+            }
+
+            // Protected endpoint requiring valid Auth0 JWT
+            authenticate("auth0") {
+                get("/user/me") {
+                    val principal = call.principal<JWTPrincipal>()
+                    val subject = principal?.payload?.subject ?: "unknown"
+                    val email = principal?.payload?.getClaim("email")?.asString()
+                    val name = principal?.payload?.getClaim("name")?.asString()
+
+                    call.respond(
+                        UserProfileDto(
+                            userId = subject,
+                            email = email,
+                            name = name,
+                            isEmailVerified = principal?.payload?.getClaim("email_verified")
+                                ?.asBoolean() ?: false
+                        )
+                    )
+                }
+            }
         }
     }
 }

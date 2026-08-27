@@ -53,5 +53,6 @@ class AppColors(
     val flagBlue: Long = 0xFF002B7FL,
     val flagYellow: Long = 0xFFFCD116L,
     val flagRed: Long = 0xFFCE1126L,
+    val success: Long = 0xFF4CAF50L,
     val pureWhite: Long = 0xFFFFFFFFL
 ) : DsColors by base

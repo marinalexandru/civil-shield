@@ -1,5 +1,7 @@
 package com.civil.shield.features.auth.ui
 
+import com.civil.shield.core.auth.UserProfileDto
+
 /**
  * UI State for AuthScreen.
  */
@@ -7,7 +9,10 @@ data class AuthScreenState(
     val selectedLanguage: String = "RO",
     val availableLanguages: List<String> = listOf("RO", "EN", "HU"),
     val isLanguageDropdownExpanded: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val authenticatedUser: UserProfileDto? = null,
+    val errorMessage: String? = null,
+    val authorizeUrlToLaunch: String? = null
 )
 
 /**
@@ -16,7 +21,11 @@ data class AuthScreenState(
 sealed interface AuthUiAction {
     data class SelectLanguage(val language: String) : AuthUiAction
     data class SetDropdownExpanded(val expanded: Boolean) : AuthUiAction
-    data object Authenticate : AuthUiAction
+    data class Authenticate(val connection: String? = null) : AuthUiAction
+    data class HandleCallback(val code: String, val state: String) : AuthUiAction
+    data class SetError(val message: String) : AuthUiAction
+    data object ClearAuthorizeUrl : AuthUiAction
+    data object Logout : AuthUiAction
     data object ClickTerms : AuthUiAction
     data object ClickPrivacy : AuthUiAction
 }

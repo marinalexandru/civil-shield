@@ -103,11 +103,40 @@ fun AuthScreenContent(
                 onLanguageSelected = { onAction(AuthUiAction.SelectLanguage(it)) }
             )
 
-            AuthIdentityCluster()
+            state.errorMessage?.let { error ->
+                Surface(
+                    color = Color(appColors.error).copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(SpacingSmall),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(appColors.error)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = SpacingMedium, vertical = SpacingSmall)
+                ) {
+                    Text(
+                        text = error,
+                        color = Color(appColors.error),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(SpacingSmall),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            val authenticatedUser = state.authenticatedUser
+            if (authenticatedUser != null) {
+                AuthenticatedUserCard(
+                    user = authenticatedUser,
+                    onLogout = { onAction(AuthUiAction.Logout) }
+                )
+            } else {
+                AuthIdentityCluster()
+            }
 
             AuthFooter(
                 isLoading = state.isLoading,
-                onAuthenticate = { onAction(AuthUiAction.Authenticate) },
+                isAuthenticated = authenticatedUser != null,
+                onAuthenticate = { onAction(AuthUiAction.Authenticate()) },
+                onLogout = { onAction(AuthUiAction.Logout) },
                 onTermsClick = { onAction(AuthUiAction.ClickTerms) },
                 onPrivacyClick = { onAction(AuthUiAction.ClickPrivacy) }
             )
@@ -265,12 +294,83 @@ fun AuthIdentityCluster(
 }
 
 /**
+ * Displayed when user is successfully authenticated.
+ */
+@Composable
+fun AuthenticatedUserCard(
+    user: com.civil.shield.core.auth.UserProfileDto,
+    onLogout: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val appColors = CivilShieldTheme.colors
+    val cardShape = RoundedCornerShape(SpacingMedium)
+
+    Surface(
+        color = Color(appColors.surfaceContainer),
+        shape = cardShape,
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(appColors.outlineVariant)),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = SpacingSmall)
+    ) {
+        Column(
+            modifier = Modifier.padding(SpacingLarge),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CivilShieldLogo()
+
+            Spacer(modifier = Modifier.height(SpacingMedium))
+
+            Text(
+                text = user.name ?: user.email ?: user.userId,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = Color(appColors.pureWhite),
+                textAlign = TextAlign.Center
+            )
+
+            if (!user.email.isNullOrBlank() && user.name != null) {
+                Spacer(modifier = Modifier.height(SpacingXXSmall))
+                Text(
+                    text = user.email ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(appColors.onSurfaceVariant),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(modifier = Modifier.height(SpacingSmall))
+
+            TricolorFlagDivider(width = 180.dp, height = SpacingXXSmall)
+
+            Spacer(modifier = Modifier.height(SpacingMedium))
+
+            Surface(
+                color = Color(appColors.success).copy(alpha = 0.2f),
+                shape = RoundedCornerShape(SpacingXSmall),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(appColors.success))
+            ) {
+                Text(
+                    text = AppStrings.AUTH_SUCCESS_BADGE.defaultText(),
+                    color = Color(appColors.success),
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(horizontal = SpacingSmall, vertical = SpacingXXSmall)
+                )
+            }
+        }
+    }
+}
+
+/**
  * Bottom footer section containing the primary ROeID button, security badge, and legal links.
  */
 @Composable
 fun AuthFooter(
     isLoading: Boolean,
+    isAuthenticated: Boolean = false,
     onAuthenticate: () -> Unit,
+    onLogout: () -> Unit = {},
     onTermsClick: () -> Unit,
     onPrivacyClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -283,13 +383,21 @@ fun AuthFooter(
             .padding(bottom = SpacingXLarge),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        PrimaryButton(
-            text = AppStrings.AUTH_LOGIN_BUTTON.defaultText(),
-            onClick = onAuthenticate,
-            isLoading = isLoading,
-            leadingIcon = Icons.Default.Fingerprint,
-            iconContentDescription = AppStrings.AUTH_LOGIN_BUTTON.defaultText()
-        )
+        if (isAuthenticated) {
+            PrimaryButton(
+                text = AppStrings.AUTH_LOGOUT.defaultText(),
+                onClick = onLogout,
+                isLoading = isLoading
+            )
+        } else {
+            PrimaryButton(
+                text = AppStrings.AUTH_LOGIN_BUTTON.defaultText(),
+                onClick = onAuthenticate,
+                isLoading = isLoading,
+                leadingIcon = Icons.Default.Fingerprint,
+                iconContentDescription = AppStrings.AUTH_LOGIN_BUTTON.defaultText()
+            )
+        }
 
         Spacer(modifier = Modifier.height(SpacingMedium))
 
@@ -332,12 +440,41 @@ fun AuthFooter(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A192F)
+@Preview(name = "AuthScreen - Default", showBackground = true, backgroundColor = 0xFF0A192F)
 @Composable
 fun AuthScreenPreview() {
     CivilShieldTheme {
         AuthScreenContent(
             state = AuthScreenState(),
+            onAction = {}
+        )
+    }
+}
+
+@Preview(name = "AuthScreen - Loading", showBackground = true, backgroundColor = 0xFF0A192F)
+@Composable
+fun AuthScreenLoadingPreview() {
+    CivilShieldTheme {
+        AuthScreenContent(
+            state = AuthScreenState(isLoading = true),
+            onAction = {}
+        )
+    }
+}
+
+@Preview(name = "AuthScreen - Authenticated", showBackground = true, backgroundColor = 0xFF0A192F)
+@Composable
+fun AuthScreenAuthenticatedPreview() {
+    CivilShieldTheme {
+        AuthScreenContent(
+            state = AuthScreenState(
+                authenticatedUser = com.civil.shield.core.auth.UserProfileDto(
+                    userId = "auth0|12345678",
+                    name = "Alexandru Marin",
+                    email = "alexandru@example.com",
+                    isEmailVerified = true
+                )
+            ),
             onAction = {}
         )
     }
