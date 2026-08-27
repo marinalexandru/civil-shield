@@ -1,0 +1,15 @@
+.git
+.gitignore
+.gradle
+.idea
+.gemini
+build
+*/build
+*/*/build
+app/androidApp
+app/sharedLogic
+design-system
+*.iml
+local.properties
+*.apk
+*.aab
