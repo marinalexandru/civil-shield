@@ -1,6 +1,5 @@
 .git
 .gitignore
-.gcloudignore
 .gradle
 .idea
 .gemini
@@ -12,6 +11,7 @@ local.properties
 *.apk
 *.aab
 
+# Exclude unnecessary build outputs but explicitly include the server fat jar
 build/
 core/build/
 server/build/classes/
