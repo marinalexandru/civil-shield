@@ -45,7 +45,9 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Server Fat JAR
-        run: ./gradlew :server:shadowJar --no-daemon
+        run: |
+          ./gradlew :server:shadowJar --no-daemon
+          cp server/build/libs/server-all.jar ./app.jar
 
       - name: Google Cloud Auth
         uses: google-github-actions/auth@v2

@@ -10,7 +10,7 @@ RUN addgroup -S civilshield && adduser -S civilshield -G civilshield
 USER civilshield
 
 # Copy pre-built standalone shadow JAR
-COPY --chown=civilshield:civilshield server/build/libs/server-all.jar app.jar
+COPY --chown=civilshield:civilshield app.jar app.jar
 
 # Google Cloud Run injects PORT environment variable dynamically
 ENV PORT=8080
