@@ -131,6 +131,8 @@ open class AuthScreenViewModel(
     }
 
     fun logout() {
-        authRepository.logout()
+        viewModelScope.launch {
+            authRepository.logout()
+        }
     }
 }

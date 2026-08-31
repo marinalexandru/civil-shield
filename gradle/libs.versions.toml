@@ -22,8 +22,13 @@ kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.8.0"
 
 design-system = "1.0.0-beta08"
+koin = "4.0.2"
 
 [libraries]
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 design-system = { group = "com.savantarch", name = "design-system", version.ref = "design-system" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

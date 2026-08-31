@@ -1,6 +1,7 @@
 package com.civil.shield
 
 import com.civil.shield.core.auth.Auth0Config
+import com.civil.shield.core.auth.LogoutResponse
 import com.civil.shield.core.auth.UserProfileDto
 import com.civil.shield.plugins.configureSecurity
 import com.civil.shield.plugins.configureSerialization
@@ -13,6 +14,7 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 
@@ -43,6 +45,25 @@ fun Application.module() {
                         "domain" to Auth0Config.DOMAIN,
                         "clientId" to Auth0Config.CLIENT_ID,
                         "audience" to Auth0Config.AUDIENCE
+                    )
+                )
+            }
+
+            // Logout endpoint to invalidate session or acknowledge user logout
+            post("/auth/logout") {
+                call.respond(
+                    LogoutResponse(
+                        success = true,
+                        message = "Logged out successfully"
+                    )
+                )
+            }
+
+            get("/auth/logout") {
+                call.respond(
+                    LogoutResponse(
+                        success = true,
+                        message = "Logged out successfully"
                     )
                 )
             }

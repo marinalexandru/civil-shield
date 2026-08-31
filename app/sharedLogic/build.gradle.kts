@@ -37,6 +37,8 @@ kotlin {
         commonMain.dependencies {
             api(projects.core)
             api(projects.designSystem)
+            api(libs.koin.core)
+            api(libs.koin.compose.viewmodel)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.clientCore)

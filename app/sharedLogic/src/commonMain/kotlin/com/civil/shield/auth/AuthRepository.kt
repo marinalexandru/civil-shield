@@ -3,12 +3,14 @@ package com.civil.shield.auth
 import com.civil.shield.core.auth.Auth0Config
 import com.civil.shield.core.auth.AuthTokenResponse
 import com.civil.shield.core.auth.UserProfileDto
+import com.civil.shield.core.config.ServerConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
@@ -18,18 +20,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
 
-sealed interface AuthState {
-    data object Unauthenticated : AuthState
-    data object Authenticating : AuthState
-    data class Authenticated(
-        val user: UserProfileDto,
-        val tokens: AuthTokenResponse
-    ) : AuthState
-    data class Error(val message: String) : AuthState
-}
-
 class AuthRepository(
-    private val httpClient: HttpClient = createDefaultHttpClient()
+    private val httpClient: HttpClient = createDefaultHttpClient(),
+    private val backendBaseUrl: String = ServerConfig.BASE_URL
 ) {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -108,19 +101,6 @@ class AuthRepository(
     }
 
     suspend fun fetchUserInfo(accessToken: String): UserProfileDto {
-        val response = httpClient.get("https://${Auth0Config.DOMAIN}/userinfo") {
-            header("Authorization", "Bearer $accessToken")
-        }
-
-        if (response.status != HttpStatusCode.OK) {
-            val body = response.bodyAsText()
-            throw IllegalStateException("UserInfo request failed (${response.status}): $body")
-        }
-
-        return response.body<UserProfileDto>()
-    }
-
-    suspend fun fetchBackendProfile(accessToken: String, backendBaseUrl: String = "http://10.0.2.2:8080"): UserProfileDto {
         val response = httpClient.get("$backendBaseUrl/api/v1/user/me") {
             header("Authorization", "Bearer $accessToken")
         }
@@ -133,9 +113,20 @@ class AuthRepository(
         return response.body<UserProfileDto>()
     }
 
-    fun logout() {
-        activePkceSession = null
-        _authState.value = AuthState.Unauthenticated
+    suspend fun logout(accessToken: String? = null) {
+        val currentAccessToken = accessToken ?: (_authState.value as? AuthState.Authenticated)?.tokens?.accessToken
+        try {
+            httpClient.post("$backendBaseUrl/api/v1/auth/logout") {
+                if (!currentAccessToken.isNullOrBlank()) {
+                    header("Authorization", "Bearer $currentAccessToken")
+                }
+            }
+        } catch (_: Exception) {
+            // Proceed with clearing local authentication state even if network call fails
+        } finally {
+            activePkceSession = null
+            _authState.value = AuthState.Unauthenticated
+        }
     }
 
     companion object {

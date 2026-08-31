@@ -36,4 +36,18 @@ class ApplicationTest {
         val response = client.get("/api/v1/user/me")
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
+
+    @Test
+    fun testLogoutEndpoint() = testApplication {
+        application {
+            module()
+        }
+        val postResponse = client.post("/api/v1/auth/logout")
+        assertEquals(HttpStatusCode.OK, postResponse.status)
+        assertTrue(postResponse.bodyAsText().contains("Logged out successfully"))
+
+        val getResponse = client.get("/api/v1/auth/logout")
+        assertEquals(HttpStatusCode.OK, getResponse.status)
+        assertTrue(getResponse.bodyAsText().contains("Logged out successfully"))
+    }
 }

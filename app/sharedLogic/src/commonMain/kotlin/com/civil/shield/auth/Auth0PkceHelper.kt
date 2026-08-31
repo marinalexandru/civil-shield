@@ -2,12 +2,6 @@ package com.civil.shield.auth
 
 import com.civil.shield.core.auth.Auth0Config
 
-data class PkceSession(
-    val codeVerifier: String,
-    val state: String,
-    val authorizeUrl: String
-)
-
 object Auth0PkceHelper {
 
     /**
