@@ -3,26 +3,12 @@ package com.civil.shield.auth
 import com.civil.shield.core.auth.Auth0Config
 import com.civil.shield.core.auth.AuthTokenResponse
 import com.civil.shield.core.auth.UserProfileDto
-import com.civil.shield.core.config.ServerConfig
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.forms.submitForm
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.Parameters
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.serialization.json.Json
 
 class AuthRepository(
-    private val httpClient: HttpClient = createDefaultHttpClient(),
-    private val backendBaseUrl: String = ServerConfig.BASE_URL
+    private val authApiService: AuthApiService = AuthApiServiceImpl()
 ) {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -55,13 +41,13 @@ class AuthRepository(
         }
 
         return try {
-            val tokenResponse = exchangeCodeForToken(
+            val tokenResponse = authApiService.exchangeCodeForToken(
                 code = code,
                 codeVerifier = session.codeVerifier,
                 redirectUri = redirectUri
             )
 
-            val profile = fetchUserInfo(tokenResponse.accessToken)
+            val profile = authApiService.fetchUserInfo(tokenResponse.accessToken)
 
             _authState.value = AuthState.Authenticated(
                 user = profile,
@@ -81,66 +67,26 @@ class AuthRepository(
         codeVerifier: String,
         redirectUri: String
     ): AuthTokenResponse {
-        val response = httpClient.submitForm(
-            url = "https://${Auth0Config.DOMAIN}/oauth/token",
-            formParameters = Parameters.build {
-                append("grant_type", "authorization_code")
-                append("client_id", Auth0Config.CLIENT_ID)
-                append("code_verifier", codeVerifier)
-                append("code", code)
-                append("redirect_uri", redirectUri)
-            }
+        return authApiService.exchangeCodeForToken(
+            code = code,
+            codeVerifier = codeVerifier,
+            redirectUri = redirectUri
         )
-
-        if (response.status != HttpStatusCode.OK) {
-            val body = response.bodyAsText()
-            throw IllegalStateException("Token exchange failed (${response.status}): $body")
-        }
-
-        return response.body<AuthTokenResponse>()
     }
 
     suspend fun fetchUserInfo(accessToken: String): UserProfileDto {
-        val response = httpClient.get("$backendBaseUrl/api/v1/user/me") {
-            header("Authorization", "Bearer $accessToken")
-        }
-
-        if (response.status != HttpStatusCode.OK) {
-            val body = response.bodyAsText()
-            throw IllegalStateException("Backend /user/me failed (${response.status}): $body")
-        }
-
-        return response.body<UserProfileDto>()
+        return authApiService.fetchUserInfo(accessToken)
     }
 
     suspend fun logout(accessToken: String? = null) {
         val currentAccessToken = accessToken ?: (_authState.value as? AuthState.Authenticated)?.tokens?.accessToken
         try {
-            httpClient.post("$backendBaseUrl/api/v1/auth/logout") {
-                if (!currentAccessToken.isNullOrBlank()) {
-                    header("Authorization", "Bearer $currentAccessToken")
-                }
-            }
+            authApiService.logout(currentAccessToken)
         } catch (_: Exception) {
             // Proceed with clearing local authentication state even if network call fails
         } finally {
             activePkceSession = null
             _authState.value = AuthState.Unauthenticated
-        }
-    }
-
-    companion object {
-        fun createDefaultHttpClient(): HttpClient {
-            return HttpClient {
-                install(ContentNegotiation) {
-                    json(Json {
-                        prettyPrint = true
-                        isLenient = true
-                        ignoreUnknownKeys = true
-                        encodeDefaults = true
-                    })
-                }
-            }
         }
     }
 }

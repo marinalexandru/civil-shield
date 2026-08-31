@@ -42,6 +42,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.ktor.clientCore)
+            implementation(libs.ktor.clientLogging)
             implementation(libs.ktor.clientContentNegotiation)
             implementation(libs.ktor.clientSerializationJson)
         }
