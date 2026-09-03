@@ -13,7 +13,7 @@ kotlin {
 
 dependencies {
     implementation(projects.app.sharedLogic)
-    implementation(projects.designSystem)
+    implementation(projects.app.designSystem)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

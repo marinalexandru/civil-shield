@@ -29,19 +29,19 @@ com.civil.shield/
 
 ---
 
-## 2. Design System Integration (`:design-system`)
+## 2. Design System Integration (`:app:design-system`)
 
-All visual tokens and user-facing copy must be driven by the design system module (`:design-system`).
+All visual tokens and user-facing copy must be driven by the design system module (`:app:design-system`).
 
 ### A. Colors (No Hardcoding)
 - **Rule**: Never hardcode colors directly in screen composables (e.g., `Color(0xFF002B7F)` is strictly forbidden).
 - **Usage**: Access colors through `CivilShieldTheme.colors.<token>` or `Color(CivilShieldTheme.colors.<token>)`.
-- **Definition**: New color tokens must be registered in `:design-system` (`AppColors.kt` / `BaseDsColors`).
+- **Definition**: New color tokens must be registered in `:app:design-system` (`AppColors.kt` / `BaseDsColors`).
 - Reference: [kmp-design-system #colors](https://github.com/savantarch/kmp-design-system#colors)
 
 ### B. Strings (No Hardcoded Copy)
 - **Rule**: Never hardcode text strings in Compose UI (e.g., `text = "CIVILSHIELD"` or `"Autentificare"` is forbidden).
-- **Usage**: Define all strings as tokens in `AppStrings.kt` (under `:design-system`) using `AppStrings.<TOKEN>.defaultText()`.
+- **Usage**: Define all strings as tokens in `AppStrings.kt` (under `:app:design-system`) using `AppStrings.<TOKEN>.defaultText()`.
 - Reference: [kmp-design-system #strings](https://github.com/savantarch/kmp-design-system#strings)
 
 ### C. Spacing & Sizing Tokens
