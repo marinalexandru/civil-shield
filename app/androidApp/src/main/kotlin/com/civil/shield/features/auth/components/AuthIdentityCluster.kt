@@ -1,4 +1,4 @@
-package com.civil.shield.features.auth.ui
+package com.civil.shield.features.auth.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

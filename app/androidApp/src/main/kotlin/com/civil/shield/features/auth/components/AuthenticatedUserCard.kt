@@ -1,5 +1,6 @@
-package com.civil.shield.features.auth.ui
+package com.civil.shield.features.auth.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,7 +44,7 @@ fun AuthenticatedUserCard(
     Surface(
         color = Color(appColors.surfaceContainer),
         shape = cardShape,
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(appColors.outlineVariant)),
+        border = BorderStroke(1.dp, Color(appColors.outlineVariant)),
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = SpacingSmall)
@@ -84,7 +85,7 @@ fun AuthenticatedUserCard(
             Surface(
                 color = Color(appColors.success).copy(alpha = 0.2f),
                 shape = RoundedCornerShape(SpacingXSmall),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(appColors.success))
+                border = BorderStroke(1.dp, Color(appColors.success))
             ) {
                 Text(
                     text = AppStrings.AUTH_SUCCESS_BADGE.defaultText(),

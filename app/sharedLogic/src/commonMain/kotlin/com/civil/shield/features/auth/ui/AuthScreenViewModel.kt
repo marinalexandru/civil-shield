@@ -11,13 +11,15 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 
 /**
  * KMP ViewModel managing AuthScreen state and user actions,
  * powered by the official androidx.lifecycle:lifecycle-viewmodel multiplatform library.
  */
+@KoinViewModel
 open class AuthScreenViewModel(
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthScreenState())

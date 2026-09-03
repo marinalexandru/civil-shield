@@ -1,5 +1,6 @@
-package com.civil.shield.features.auth.ui
+package com.civil.shield.features.auth
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,13 @@ import com.civil.shield.core.ui.theme.CivilShieldTheme
 import com.civil.shield.core.ui.theme.SpacingLarge
 import com.civil.shield.core.ui.theme.SpacingMedium
 import com.civil.shield.core.ui.theme.SpacingSmall
+import com.civil.shield.features.auth.components.AuthFooter
+import com.civil.shield.features.auth.components.AuthIdentityCluster
+import com.civil.shield.features.auth.ui.AuthScreenState
+import com.civil.shield.features.auth.ui.AuthScreenViewModel
+import com.civil.shield.features.auth.components.AuthTopBar
+import com.civil.shield.features.auth.ui.AuthUiAction
+import com.civil.shield.features.auth.components.AuthenticatedUserCard
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -78,7 +86,7 @@ fun AuthScreenContent(
                 Surface(
                     color = Color(appColors.error).copy(alpha = 0.15f),
                     shape = RoundedCornerShape(SpacingSmall),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(appColors.error)),
+                    border = BorderStroke(1.dp, Color(appColors.error)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = SpacingMedium, vertical = SpacingSmall)

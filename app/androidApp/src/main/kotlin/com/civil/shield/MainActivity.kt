@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.civil.shield.core.ui.theme.CivilShieldTheme
-import com.civil.shield.features.auth.ui.AuthScreen
+import com.civil.shield.features.auth.AuthScreen
 import com.civil.shield.features.auth.ui.AuthScreenViewModel
 import com.civil.shield.features.auth.ui.AuthUiAction
 

@@ -6,9 +6,11 @@ import com.civil.shield.core.auth.UserProfileDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.koin.core.annotation.Single
 
+@Single
 class AuthRepository(
-    private val authApiService: AuthApiService = AuthApiServiceImpl()
+    private val authApiService: AuthApiService
 ) {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
