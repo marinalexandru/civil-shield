@@ -19,9 +19,18 @@ import com.civil.shield.features.auth.AuthScreen
 import com.civil.shield.features.auth.ui.AuthScreenViewModel
 import com.civil.shield.features.auth.ui.AuthUiAction
 
+import androidx.activity.compose.BackHandler
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
+import com.civil.shield.features.main.MainScreen
+import com.civil.shield.navigation.AppDestination
+import com.civil.shield.navigation.AppNavigator
+import org.koin.android.ext.android.inject
+
 class MainActivity : ComponentActivity() {
 
     private val authViewModel: AuthScreenViewModel by viewModel()
+    private val navigator: AppNavigator by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -31,6 +40,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CivilShieldTheme {
+                val backStack by navigator.backStack.collectAsStateWithLifecycle()
                 val state by authViewModel.state.collectAsStateWithLifecycle()
                 val context = LocalContext.current
 
@@ -45,7 +55,22 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                AuthScreen(viewModel = authViewModel)
+                BackHandler(enabled = backStack.size > 1) {
+                    navigator.pop()
+                }
+
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = { navigator.pop() },
+                    entryProvider = entryProvider {
+                        entry<AppDestination.Auth> {
+                            AuthScreen(viewModel = authViewModel)
+                        }
+                        entry<AppDestination.Main> {
+                            MainScreen()
+                        }
+                    }
+                )
             }
         }
     }

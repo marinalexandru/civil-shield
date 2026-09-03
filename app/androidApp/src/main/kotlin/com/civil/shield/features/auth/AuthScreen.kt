@@ -116,6 +116,7 @@ fun AuthScreenContent(
                 isAuthenticated = authenticatedUser != null,
                 onAuthenticate = { onAction(AuthUiAction.Authenticate()) },
                 onLogout = { onAction(AuthUiAction.Logout) },
+                onShortcutToMain = { onAction(AuthUiAction.NavigateToMain) },
                 onTermsClick = { onAction(AuthUiAction.ClickTerms) },
                 onPrivacyClick = { onAction(AuthUiAction.ClickPrivacy) }
             )

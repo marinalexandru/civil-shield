@@ -13,13 +13,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
+import com.civil.shield.navigation.AppDestination
+import com.civil.shield.navigation.AppNavigator
+
 /**
  * KMP ViewModel managing AuthScreen state and user actions,
  * powered by the official androidx.lifecycle:lifecycle-viewmodel multiplatform library.
  */
 @KoinViewModel
 open class AuthScreenViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val navigator: AppNavigator
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthScreenState())
@@ -79,9 +83,14 @@ open class AuthScreenViewModel(
             is AuthUiAction.SetError -> setError(action.message)
             AuthUiAction.ClearAuthorizeUrl -> clearAuthorizeUrl()
             AuthUiAction.Logout -> logout()
+            AuthUiAction.NavigateToMain -> navigateToMain()
             AuthUiAction.ClickTerms -> Unit
             AuthUiAction.ClickPrivacy -> Unit
         }
+    }
+
+    fun navigateToMain() {
+        navigator.navigateTo(AppDestination.Main)
     }
 
     fun setError(message: String) {

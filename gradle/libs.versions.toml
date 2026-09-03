@@ -25,8 +25,11 @@ design-system = "1.0.0-beta08"
 koin = "4.0.2"
 ksp = "2.3.10"
 koin-ksp = "2.0.0"
+navigation3 = "1.0.0"
 
 [libraries]
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin-ksp" }
 koin-ksp-compiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koin-ksp" }

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.civil.shield.core.ui.components.PrimaryButton
 import com.civil.shield.core.ui.theme.CivilShieldTheme
 import com.civil.shield.core.ui.theme.SpacingMedium
+import com.civil.shield.core.ui.theme.SpacingSmall
 import com.civil.shield.core.ui.theme.SpacingXLarge
 import com.civilshield.designsystem.AppStrings
 
@@ -35,6 +36,7 @@ fun AuthFooter(
     isAuthenticated: Boolean = false,
     onAuthenticate: () -> Unit,
     onLogout: () -> Unit = {},
+    onShortcutToMain: () -> Unit = {},
     onTermsClick: () -> Unit,
     onPrivacyClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -63,7 +65,21 @@ fun AuthFooter(
             )
         }
 
-        Spacer(modifier = Modifier.height(SpacingMedium))
+        Spacer(modifier = Modifier.height(SpacingSmall))
+
+        Text(
+            text = AppStrings.AUTH_DEV_SHORTCUT_MAIN.defaultText(),
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = Color(appColors.flagYellow),
+            modifier = Modifier
+                .clickable { onShortcutToMain() }
+                .padding(SpacingSmall)
+        )
+
+        Spacer(modifier = Modifier.height(SpacingSmall))
 
         Text(
             text = AppStrings.AUTH_PROTECTED_BY.defaultText(),

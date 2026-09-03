@@ -11,6 +11,7 @@ sealed interface AuthUiAction {
     data class SetError(val message: String) : AuthUiAction
     data object ClearAuthorizeUrl : AuthUiAction
     data object Logout : AuthUiAction
+    data object NavigateToMain : AuthUiAction
     data object ClickTerms : AuthUiAction
     data object ClickPrivacy : AuthUiAction
 }
