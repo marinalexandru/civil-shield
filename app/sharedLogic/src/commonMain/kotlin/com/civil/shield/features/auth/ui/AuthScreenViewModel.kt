@@ -37,7 +37,6 @@ open class AuthScreenViewModel(
                         _state.update {
                             it.copy(
                                 isLoading = false,
-                                authenticatedUser = null,
                                 errorMessage = null
                             )
                         }
@@ -54,11 +53,11 @@ open class AuthScreenViewModel(
                         _state.update {
                             it.copy(
                                 isLoading = false,
-                                authenticatedUser = authState.user,
                                 errorMessage = null,
                                 authorizeUrlToLaunch = null
                             )
                         }
+                        navigator.replaceRoot(AppDestination.Main)
                     }
                     is AuthState.Error -> {
                         _state.update {
@@ -82,6 +81,7 @@ open class AuthScreenViewModel(
             is AuthUiAction.HandleCallback -> handleCallback(action.code, action.state)
             is AuthUiAction.SetError -> setError(action.message)
             AuthUiAction.ClearAuthorizeUrl -> clearAuthorizeUrl()
+            AuthUiAction.ClearError -> clearError()
             AuthUiAction.Logout -> logout()
             AuthUiAction.NavigateToMain -> navigateToMain()
             AuthUiAction.ClickTerms -> Unit
@@ -91,6 +91,10 @@ open class AuthScreenViewModel(
 
     fun navigateToMain() {
         navigator.navigateTo(AppDestination.Main)
+    }
+
+    fun clearError() {
+        _state.update { it.copy(errorMessage = null) }
     }
 
     fun setError(message: String) {

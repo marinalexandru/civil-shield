@@ -43,7 +43,7 @@ fun PrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isLoading: Boolean = false,
-    leadingIcon: ImageVector? = Icons.Default.Fingerprint,
+    leadingIcon: ImageVector? = null,
     iconContentDescription: String? = null,
     height: Dp = MinTouchTarget,
     shape: RoundedCornerShape = RoundedCornerShape(SpacingSmall),

@@ -10,6 +10,7 @@ sealed interface AuthUiAction {
     data class HandleCallback(val code: String, val state: String) : AuthUiAction
     data class SetError(val message: String) : AuthUiAction
     data object ClearAuthorizeUrl : AuthUiAction
+    data object ClearError : AuthUiAction
     data object Logout : AuthUiAction
     data object NavigateToMain : AuthUiAction
     data object ClickTerms : AuthUiAction

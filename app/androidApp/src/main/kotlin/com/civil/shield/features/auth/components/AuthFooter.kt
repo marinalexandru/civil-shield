@@ -33,9 +33,7 @@ import com.civilshield.designsystem.AppStrings
 @Composable
 fun AuthFooter(
     isLoading: Boolean,
-    isAuthenticated: Boolean = false,
     onAuthenticate: () -> Unit,
-    onLogout: () -> Unit = {},
     onShortcutToMain: () -> Unit = {},
     onTermsClick: () -> Unit,
     onPrivacyClick: () -> Unit,
@@ -49,21 +47,13 @@ fun AuthFooter(
             .padding(bottom = SpacingXLarge),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (isAuthenticated) {
-            PrimaryButton(
-                text = AppStrings.AUTH_LOGOUT.defaultText(),
-                onClick = onLogout,
-                isLoading = isLoading
-            )
-        } else {
-            PrimaryButton(
-                text = AppStrings.AUTH_LOGIN_BUTTON.defaultText(),
-                onClick = onAuthenticate,
-                isLoading = isLoading,
-                leadingIcon = Icons.Default.Fingerprint,
-                iconContentDescription = AppStrings.AUTH_LOGIN_BUTTON.defaultText()
-            )
-        }
+        PrimaryButton(
+            text = AppStrings.AUTH_LOGIN_BUTTON.defaultText(),
+            onClick = onAuthenticate,
+            isLoading = isLoading,
+            leadingIcon = Icons.Default.Fingerprint,
+            iconContentDescription = AppStrings.AUTH_LOGIN_BUTTON.defaultText()
+        )
 
         Spacer(modifier = Modifier.height(SpacingSmall))
 
@@ -120,13 +110,12 @@ fun AuthFooter(
     }
 }
 
-@Preview(name = "AuthFooter - Unauthenticated", showBackground = true, backgroundColor = 0xFF0A192F)
+@Preview(name = "AuthFooter - Default", showBackground = true, backgroundColor = 0xFF0A192F)
 @Composable
-private fun AuthFooterUnauthenticatedPreview() {
+private fun AuthFooterDefaultPreview() {
     CivilShieldTheme {
         AuthFooter(
             isLoading = false,
-            isAuthenticated = false,
             onAuthenticate = {},
             onTermsClick = {},
             onPrivacyClick = {}
@@ -134,15 +123,13 @@ private fun AuthFooterUnauthenticatedPreview() {
     }
 }
 
-@Preview(name = "AuthFooter - Authenticated", showBackground = true, backgroundColor = 0xFF0A192F)
+@Preview(name = "AuthFooter - Loading", showBackground = true, backgroundColor = 0xFF0A192F)
 @Composable
-private fun AuthFooterAuthenticatedPreview() {
+private fun AuthFooterLoadingPreview() {
     CivilShieldTheme {
         AuthFooter(
-            isLoading = false,
-            isAuthenticated = true,
+            isLoading = true,
             onAuthenticate = {},
-            onLogout = {},
             onTermsClick = {},
             onPrivacyClick = {}
         )

@@ -1,10 +1,10 @@
 package com.civil.shield.features.main
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,16 +27,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.civil.shield.core.auth.UserProfileDto
 import com.civil.shield.core.ui.components.PrimaryButton
 import com.civil.shield.core.ui.components.TricolorFlagDivider
 import com.civil.shield.core.ui.theme.CivilShieldTheme
@@ -45,6 +48,8 @@ import com.civil.shield.core.ui.theme.SpacingLarge
 import com.civil.shield.core.ui.theme.SpacingMedium
 import com.civil.shield.core.ui.theme.SpacingSmall
 import com.civil.shield.core.ui.theme.SpacingXLarge
+import com.civil.shield.features.main.components.GuestProfileCard
+import com.civil.shield.features.main.components.UserProfileCard
 import com.civil.shield.features.main.ui.MainScreenState
 import com.civil.shield.features.main.ui.MainUiAction
 import com.civil.shield.features.main.ui.MainViewModel
@@ -60,6 +65,14 @@ fun MainScreen(
     viewModel: MainViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            viewModel.onAction(MainUiAction.ClearError)
+        }
+    }
 
     MainScreenContent(
         state = state,
@@ -127,70 +140,11 @@ fun MainScreenContent(
                         .padding(bottom = SpacingLarge)
                 )
 
-                Spacer(modifier = Modifier.height(SpacingLarge))
-
-                Box(
-                    modifier = Modifier
-                        .size(IconSizeLarge)
-                        .background(
-                            color = Color(appColors.primary).copy(alpha = 0.2f),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Dashboard,
-                        contentDescription = null,
-                        tint = Color(appColors.primary),
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(SpacingMedium))
-
-                Text(
-                    text = AppStrings.MAIN_SCREEN_SUBTITLE.defaultText(),
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(appColors.onPrimary)
-                    ),
-                    textAlign = TextAlign.Center
-                )
-
-                state.username?.let { name ->
-                    Spacer(modifier = Modifier.height(SpacingSmall))
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color(appColors.flagYellow),
-                            fontWeight = FontWeight.Medium
-                        ),
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(SpacingLarge))
-
-                Card(
-                    shape = RoundedCornerShape(SpacingMedium),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(appColors.surface)
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(SpacingLarge),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = AppStrings.MAIN_SCREEN_WELCOME_DESC.defaultText(),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = Color(appColors.onSurfaceVariant),
-                                lineHeight = 22.sp
-                            ),
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                val user = state.user
+                if (user != null) {
+                    UserProfileCard(user = user, modifier = Modifier.fillMaxWidth())
+                } else {
+                    GuestProfileCard(modifier = Modifier.fillMaxWidth())
                 }
             }
 
@@ -200,9 +154,19 @@ fun MainScreenContent(
                     .padding(bottom = SpacingXLarge),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val buttonText = if (state.user != null) {
+                    AppStrings.MAIN_SCREEN_LOGOUT_BUTTON.defaultText()
+                } else {
+                    AppStrings.MAIN_SCREEN_LOGIN_BUTTON.defaultText()
+                }
+                val buttonAction = if (state.user != null) {
+                    MainUiAction.Logout
+                } else {
+                    MainUiAction.Login
+                }
                 PrimaryButton(
-                    text = AppStrings.MAIN_SCREEN_LOGOUT_BUTTON.defaultText(),
-                    onClick = { onAction(MainUiAction.Logout) },
+                    text = buttonText,
+                    onClick = { onAction(buttonAction) },
                     isLoading = state.isLoading
                 )
             }
@@ -210,12 +174,30 @@ fun MainScreenContent(
     }
 }
 
-@Preview(name = "MainScreen - Default", showBackground = true, backgroundColor = 0xFF0A192F)
+@Preview(name = "MainScreen - Authenticated", showBackground = true, backgroundColor = 0xFF0A192F)
 @Composable
-private fun MainScreenPreview() {
+private fun MainScreenAuthenticatedPreview() {
     CivilShieldTheme {
         MainScreenContent(
-            state = MainScreenState(username = "Ion Popescu"),
+            state = MainScreenState(
+                user = UserProfileDto(
+                    userId = "auth0|123456",
+                    name = "Alexandru Marin",
+                    email = "alexandru@example.com",
+                    isEmailVerified = true
+                )
+            ),
+            onAction = {}
+        )
+    }
+}
+
+@Preview(name = "MainScreen - Guest", showBackground = true, backgroundColor = 0xFF0A192F)
+@Composable
+private fun MainScreenGuestPreview() {
+    CivilShieldTheme {
+        MainScreenContent(
+            state = MainScreenState(user = null),
             onAction = {}
         )
     }

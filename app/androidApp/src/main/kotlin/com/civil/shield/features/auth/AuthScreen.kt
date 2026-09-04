@@ -1,37 +1,29 @@
 package com.civil.shield.features.auth
 
-import androidx.compose.foundation.BorderStroke
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.civil.shield.core.auth.UserProfileDto
 import com.civil.shield.core.ui.theme.CivilShieldTheme
 import com.civil.shield.core.ui.theme.SpacingLarge
 import com.civil.shield.core.ui.theme.SpacingMedium
-import com.civil.shield.core.ui.theme.SpacingSmall
 import com.civil.shield.features.auth.components.AuthFooter
 import com.civil.shield.features.auth.components.AuthIdentityCluster
+import com.civil.shield.features.auth.components.AuthTopBar
 import com.civil.shield.features.auth.ui.AuthScreenState
 import com.civil.shield.features.auth.ui.AuthScreenViewModel
-import com.civil.shield.features.auth.components.AuthTopBar
 import com.civil.shield.features.auth.ui.AuthUiAction
-import com.civil.shield.features.auth.components.AuthenticatedUserCard
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -43,6 +35,14 @@ fun AuthScreen(
     viewModel: AuthScreenViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            viewModel.onAction(AuthUiAction.ClearError)
+        }
+    }
 
     AuthScreenContent(
         state = state,
@@ -82,40 +82,11 @@ fun AuthScreenContent(
                 onLanguageSelected = { onAction(AuthUiAction.SelectLanguage(it)) }
             )
 
-            state.errorMessage?.let { error ->
-                Surface(
-                    color = Color(appColors.error).copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(SpacingSmall),
-                    border = BorderStroke(1.dp, Color(appColors.error)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = SpacingMedium, vertical = SpacingSmall)
-                ) {
-                    Text(
-                        text = error,
-                        color = Color(appColors.error),
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(SpacingSmall),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            val authenticatedUser = state.authenticatedUser
-            if (authenticatedUser != null) {
-                AuthenticatedUserCard(
-                    user = authenticatedUser,
-                    onLogout = { onAction(AuthUiAction.Logout) }
-                )
-            } else {
-                AuthIdentityCluster()
-            }
+            AuthIdentityCluster()
 
             AuthFooter(
                 isLoading = state.isLoading,
-                isAuthenticated = authenticatedUser != null,
                 onAuthenticate = { onAction(AuthUiAction.Authenticate()) },
-                onLogout = { onAction(AuthUiAction.Logout) },
                 onShortcutToMain = { onAction(AuthUiAction.NavigateToMain) },
                 onTermsClick = { onAction(AuthUiAction.ClickTerms) },
                 onPrivacyClick = { onAction(AuthUiAction.ClickPrivacy) }
@@ -141,24 +112,6 @@ private fun AuthScreenLoadingPreview() {
     CivilShieldTheme {
         AuthScreenContent(
             state = AuthScreenState(isLoading = true),
-            onAction = {}
-        )
-    }
-}
-
-@Preview(name = "AuthScreen - Authenticated", showBackground = true, backgroundColor = 0xFF0A192F)
-@Composable
-private fun AuthScreenAuthenticatedPreview() {
-    CivilShieldTheme {
-        AuthScreenContent(
-            state = AuthScreenState(
-                authenticatedUser = UserProfileDto(
-                    userId = "auth0|12345678",
-                    name = "Alexandru Marin",
-                    email = "alexandru@example.com",
-                    isEmailVerified = true
-                )
-            ),
             onAction = {}
         )
     }

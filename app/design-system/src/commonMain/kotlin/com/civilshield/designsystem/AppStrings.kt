@@ -22,7 +22,10 @@ enum class AppStrings : DsStrings {
     MAIN_SCREEN_TITLE,
     MAIN_SCREEN_SUBTITLE,
     MAIN_SCREEN_LOGOUT_BUTTON,
+    MAIN_SCREEN_LOGIN_BUTTON,
     MAIN_SCREEN_WELCOME_DESC,
+    GUEST_PROFILE_TITLE,
+    GUEST_PROFILE_SUBTITLE,
     LANG_RO,
     LANG_EN,
     LANG_HU;
@@ -47,7 +50,10 @@ enum class AppStrings : DsStrings {
         MAIN_SCREEN_TITLE -> "Ecran Principal"
         MAIN_SCREEN_SUBTITLE -> "Panou de Control CivilShield"
         MAIN_SCREEN_LOGOUT_BUTTON -> "Deconectare"
+        MAIN_SCREEN_LOGIN_BUTTON -> "Autentificare / Conectare"
         MAIN_SCREEN_WELCOME_DESC -> "Bine ați venit în panoul principal CivilShield. Acest ecran este modularizat și conectat prin shared navigation."
+        GUEST_PROFILE_TITLE -> "Utilizator Vizitator"
+        GUEST_PROFILE_SUBTITLE -> "Acces temporar / Neautentificat"
         LANG_RO -> "RO"
         LANG_EN -> "EN"
         LANG_HU -> "HU"

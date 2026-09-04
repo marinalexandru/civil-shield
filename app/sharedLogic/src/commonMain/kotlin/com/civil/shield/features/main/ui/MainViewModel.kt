@@ -33,12 +33,13 @@ open class MainViewModel(
                 when (authState) {
                     is AuthState.Authenticated -> {
                         _state.update {
-                            it.copy(username = authState.user.name ?: authState.user.email)
+                            it.copy(user = authState.user)
                         }
                     }
-                    else -> {
-                        _state.update { it.copy(username = null) }
+                    is AuthState.Unauthenticated -> {
+                        _state.update { it.copy(user = null) }
                     }
+                    else -> Unit
                 }
             }
             .launchIn(viewModelScope)
@@ -46,17 +47,24 @@ open class MainViewModel(
 
     fun onAction(action: MainUiAction) {
         when (action) {
+            MainUiAction.Login -> navigator.replaceRoot(AppDestination.Auth)
             MainUiAction.Logout -> logout()
             MainUiAction.NavigateBack -> navigator.pop()
+            MainUiAction.ClearError -> _state.update { it.copy(errorMessage = null) }
         }
     }
 
     private fun logout() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            authRepository.logout()
-            _state.update { it.copy(isLoading = false) }
-            navigator.replaceRoot(AppDestination.Auth)
+            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                authRepository.logout()
+                navigator.replaceRoot(AppDestination.Auth)
+            } catch (e: Exception) {
+                _state.update { it.copy(errorMessage = e.message ?: "Eroare la deconectare") }
+            } finally {
+                _state.update { it.copy(isLoading = false) }
+            }
         }
     }
 }
