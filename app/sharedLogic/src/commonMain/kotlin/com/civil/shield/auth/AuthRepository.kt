@@ -49,14 +49,32 @@ class AuthRepository(
                 redirectUri = redirectUri
             )
 
-            val profile = authApiService.fetchUserInfo(tokenResponse.accessToken)
+            // Parse ID token claims (contains name, email, picture, email_verified)
+            val idTokenProfile = tokenResponse.idToken?.let { IdTokenParser.parse(it) }
+
+            // Fetch profile from backend with fallback to ID token profile if backend is unreachable or fails
+            val backendProfile = try {
+                authApiService.fetchUserInfo(tokenResponse.accessToken)
+            } catch (e: Exception) {
+                idTokenProfile ?: throw e
+            }
+
+            // Merge profiles: prefer backend attributes, but use ID token attributes for missing fields
+            val mergedProfile = UserProfileDto(
+                userId = backendProfile.userId.ifBlank { idTokenProfile?.userId ?: "unknown" },
+                email = backendProfile.email ?: idTokenProfile?.email,
+                name = backendProfile.name ?: idTokenProfile?.name,
+                pictureUrl = backendProfile.pictureUrl ?: idTokenProfile?.pictureUrl,
+                isEmailVerified = backendProfile.isEmailVerified || (idTokenProfile?.isEmailVerified == true),
+                roles = backendProfile.roles.ifEmpty { idTokenProfile?.roles ?: emptyList() }
+            )
 
             _authState.value = AuthState.Authenticated(
-                user = profile,
+                user = mergedProfile,
                 tokens = tokenResponse
             )
             activePkceSession = null
-            Result.success(profile)
+            Result.success(mergedProfile)
         } catch (e: Exception) {
             val errorMsg = e.message ?: "Authentication failed"
             _authState.value = AuthState.Error(errorMsg)

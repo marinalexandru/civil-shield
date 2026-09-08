@@ -13,20 +13,26 @@ import java.net.URI
 import java.util.concurrent.TimeUnit
 
 fun Application.configureSecurity() {
-    val jwkProvider = JwkProviderBuilder(URI.create(Auth0Config.ISSUER).toURL())
+    val domain = System.getenv("AUTH0_DOMAIN") ?: Auth0Config.DOMAIN
+    val audience = System.getenv("AUTH0_AUDIENCE") ?: Auth0Config.AUDIENCE
+    val issuer = if (domain.startsWith("http")) domain else "https://$domain/"
+    val jwksUrl = "https://${domain.removePrefix("https://").removePrefix("http://").trimEnd('/')}/.well-known/jwks.json"
+
+    val jwkProvider = JwkProviderBuilder(URI.create(jwksUrl).toURL())
         .cached(10, 24, TimeUnit.HOURS)
         .rateLimited(10, 1, TimeUnit.MINUTES)
+        .timeouts(5000, 5000)
         .build()
 
     install(Authentication) {
         jwt("auth0") {
             realm = "CivilShield"
-            verifier(jwkProvider, Auth0Config.ISSUER) {
+            verifier(jwkProvider, issuer) {
                 acceptLeeway(3)
             }
             validate { credential ->
-                val audience = credential.payload.audience
-                if (audience.contains(Auth0Config.AUDIENCE)) {
+                val credentialAudience = credential.payload.audience
+                if (credentialAudience.contains(audience)) {
                     JWTPrincipal(credential.payload)
                 } else {
                     null
