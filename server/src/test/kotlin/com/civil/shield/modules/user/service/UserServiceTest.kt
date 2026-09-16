@@ -4,6 +4,7 @@ import com.civil.shield.core.auth.UserProfileDto
 import com.civil.shield.shared.config.Auth0Properties
 import org.junit.jupiter.api.Test
 import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.web.client.RestClient
 import java.time.Instant
 import kotlin.test.assertEquals
 
@@ -14,7 +15,7 @@ class UserServiceTest {
         clientId = "client-123",
         audience = "https://api.test.com"
     )
-    private val userService: UserService = UserServiceImpl(auth0Properties)
+    private val userService: UserService = UserServiceImpl(auth0Properties, RestClient.create())
 
     @Test
     fun `returns profile directly from JWT claims`() {
