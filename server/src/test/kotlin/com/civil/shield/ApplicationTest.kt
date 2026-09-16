@@ -1,53 +1,85 @@
 package com.civil.shield
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.testing.*
-import kotlin.test.*
+import com.civil.shield.core.auth.Auth0Config
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
+@SpringBootTest
+@AutoConfigureMockMvc
 class ApplicationTest {
 
+    @Autowired
+    private lateinit var mockMvc: MockMvc
+
+    @MockitoBean
+    private lateinit var jwtDecoder: JwtDecoder
+
     @Test
-    fun testRoot() = testApplication {
-        application {
-            module()
-        }
-        val response = client.get("/")
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(sayHello("CivilShield Backend"), response.bodyAsText())
+    fun testRoot() {
+        mockMvc.perform(get("/"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(sayHello("CivilShield Backend")))
     }
 
     @Test
-    fun testAuthConfigEndpoint() = testApplication {
-        application {
-            module()
-        }
-        val response = client.get("/api/v1/auth/config")
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertTrue(response.bodyAsText().contains("civil-shield.eu.auth0.com"))
+    fun testAuthConfigEndpoint() {
+        mockMvc.perform(get("/api/v1/auth/config"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.domain").value(Auth0Config.DOMAIN))
+            .andExpect(jsonPath("$.clientId").value(Auth0Config.CLIENT_ID))
+            .andExpect(jsonPath("$.audience").value(Auth0Config.AUDIENCE))
     }
 
     @Test
-    fun testProtectedUserMeEndpointUnauthorizedWithoutToken() = testApplication {
-        application {
-            module()
-        }
-        val response = client.get("/api/v1/user/me")
-        assertEquals(HttpStatusCode.Unauthorized, response.status)
+    fun testProtectedUserMeEndpointUnauthorizedWithoutToken() {
+        mockMvc.perform(get("/api/v1/user/me"))
+            .andExpect(status().isUnauthorized)
     }
 
     @Test
-    fun testLogoutEndpoint() = testApplication {
-        application {
-            module()
-        }
-        val postResponse = client.post("/api/v1/auth/logout")
-        assertEquals(HttpStatusCode.OK, postResponse.status)
-        assertTrue(postResponse.bodyAsText().contains("Logged out successfully"))
+    fun testProtectedUserMeEndpointWithToken() {
+        mockMvc.perform(
+            get("/api/v1/user/me")
+                .with(
+                    jwt().jwt { builder ->
+                        builder
+                            .subject("auth0|123456")
+                            .claim("email", "alex@civilshield.com")
+                            .claim("name", "Alexandru Marin")
+                            .claim("picture", "https://avatar.png")
+                            .claim("email_verified", true)
+                    }
+                )
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.sub").value("auth0|123456"))
+            .andExpect(jsonPath("$.email").value("alex@civilshield.com"))
+            .andExpect(jsonPath("$.name").value("Alexandru Marin"))
+            .andExpect(jsonPath("$.picture").value("https://avatar.png"))
+            .andExpect(jsonPath("$.email_verified").value(true))
+    }
 
-        val getResponse = client.get("/api/v1/auth/logout")
-        assertEquals(HttpStatusCode.OK, getResponse.status)
-        assertTrue(getResponse.bodyAsText().contains("Logged out successfully"))
+    @Test
+    fun testLogoutEndpoint() {
+        mockMvc.perform(post("/api/v1/auth/logout"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.message").value("Logged out successfully"))
+
+        mockMvc.perform(get("/api/v1/auth/logout"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.message").value("Logged out successfully"))
     }
 }
