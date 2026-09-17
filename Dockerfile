@@ -9,7 +9,7 @@ WORKDIR /app
 RUN addgroup -S civilshield && adduser -S civilshield -G civilshield
 USER civilshield
 
-# Copy pre-built standalone shadow JAR
+# Copy pre-built Spring Boot executable JAR
 COPY --chown=civilshield:civilshield app.jar app.jar
 
 # Google Cloud Run injects PORT environment variable dynamically
