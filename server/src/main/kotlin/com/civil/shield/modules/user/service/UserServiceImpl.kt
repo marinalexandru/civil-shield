@@ -47,8 +47,7 @@ class UserServiceImpl(
     }
 
     override fun fetchUserInfoFromAuth0(domain: String, bearerToken: String): UserProfileDto? {
-        val cleanDomain = domain.removePrefix("https://").removePrefix("http://").trimEnd('/')
-        val url = "https://$cleanDomain/userinfo"
+        val url = "https://$domain/userinfo"
 
         return try {
             val responseBody = restClient.get()

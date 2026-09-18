@@ -51,12 +51,9 @@ class SecurityConfig(
     @Bean
     @ConditionalOnMissingBean(JwtDecoder::class)
     fun jwtDecoder(): JwtDecoder {
-        val cleanDomain = auth0Properties.domain
-            .removePrefix("https://")
-            .removePrefix("http://")
-            .trimEnd('/')
-        val jwkSetUri = "https://$cleanDomain/.well-known/jwks.json"
-        val issuer = "https://$cleanDomain/"
+        val domain = auth0Properties.domain
+        val jwkSetUri = "https://$domain/.well-known/jwks.json"
+        val issuer = "https://$domain/"
 
         val jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build()
 
