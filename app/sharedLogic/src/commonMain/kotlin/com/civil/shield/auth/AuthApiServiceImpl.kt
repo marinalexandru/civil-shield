@@ -2,7 +2,6 @@ package com.civil.shield.auth
 
 import com.civil.shield.core.auth.Auth0Config
 import com.civil.shield.core.auth.AuthTokenResponse
-import com.civil.shield.core.auth.LogoutResponse
 import com.civil.shield.core.auth.UserProfileDto
 import com.civil.shield.core.config.ServerConfig
 import com.civil.shield.core.network.HttpClientFactory
@@ -11,7 +10,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.post
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
@@ -61,18 +59,18 @@ class AuthApiServiceImpl(
         return response.body<UserProfileDto>()
     }
 
-    override suspend fun logout(accessToken: String?): LogoutResponse {
-        val response = httpClient.post("$backendBaseUrl/api/v1/auth/logout") {
-            if (!accessToken.isNullOrBlank()) {
-                header("Authorization", "Bearer $accessToken")
+    override suspend fun revokeToken(refreshToken: String) {
+        val response = httpClient.submitForm(
+            url = "https://${Auth0Config.DOMAIN}/oauth/revoke",
+            formParameters = Parameters.build {
+                append("client_id", Auth0Config.CLIENT_ID)
+                append("token", refreshToken)
             }
-        }
+        )
 
         if (response.status != HttpStatusCode.OK) {
             val body = response.bodyAsText()
-            throw IllegalStateException("Backend /auth/logout failed (${response.status}): $body")
+            throw IllegalStateException("Token revocation failed (${response.status}): $body")
         }
-
-        return response.body<LogoutResponse>()
     }
 }

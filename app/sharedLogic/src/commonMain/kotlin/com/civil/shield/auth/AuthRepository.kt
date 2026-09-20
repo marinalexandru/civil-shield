@@ -19,11 +19,13 @@ class AuthRepository(
 
     fun startPkceLogin(
         redirectUri: String = Auth0Config.ANDROID_CALLBACK_URI,
-        connection: String? = null
+        connection: String? = null,
+        prompt: String? = "login"
     ): PkceSession {
         val session = Auth0PkceHelper.createPkceSession(
             redirectUri = redirectUri,
-            connection = connection
+            connection = connection,
+            prompt = prompt
         )
         activePkceSession = session
         _authState.value = AuthState.Authenticating
@@ -98,10 +100,13 @@ class AuthRepository(
         return authApiService.fetchUserInfo(accessToken)
     }
 
-    suspend fun logout(accessToken: String? = null) {
-        val currentAccessToken = accessToken ?: (_authState.value as? AuthState.Authenticated)?.tokens?.accessToken
+    suspend fun logout() {
+        val currentTokens = (_authState.value as? AuthState.Authenticated)?.tokens
         try {
-            authApiService.logout(currentAccessToken)
+            val refreshToken = currentTokens?.refreshToken
+            if (!refreshToken.isNullOrBlank()) {
+                authApiService.revokeToken(refreshToken)
+            }
         } catch (_: Exception) {
             // Proceed with clearing local authentication state even if network call fails
         } finally {

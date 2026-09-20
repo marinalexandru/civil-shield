@@ -1,7 +1,6 @@
 package com.civil.shield.auth
 
 import com.civil.shield.core.auth.AuthTokenResponse
-import com.civil.shield.core.auth.LogoutResponse
 import com.civil.shield.core.auth.UserProfileDto
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -105,6 +104,75 @@ class AuthRepositoryTest {
         assertIs<AuthState.Error>(authRepository.authState.value)
     }
 
+    @Test
+    fun testStartPkceLoginIncludesPromptLogin() {
+        val session = authRepository.startPkceLogin()
+        assertTrue(session.authorizeUrl.contains("prompt=login"))
+    }
+
+    @Test
+    fun testLogoutWithRefreshTokenRevokesAndClearsState() = runTest {
+        val session = authRepository.startPkceLogin()
+        fakeAuthApiService.tokenResponse = AuthTokenResponse(
+            accessToken = "access_token_123",
+            refreshToken = "refresh_token_xyz",
+            idToken = sampleIdToken,
+            tokenType = "Bearer",
+            expiresIn = 86400
+        )
+        fakeAuthApiService.userProfileResponse = UserProfileDto(userId = "user_1")
+
+        authRepository.handleCallback(code = "code", state = session.state)
+        assertIs<AuthState.Authenticated>(authRepository.authState.value)
+
+        authRepository.logout()
+
+        assertEquals("refresh_token_xyz", fakeAuthApiService.revokedToken)
+        assertIs<AuthState.Unauthenticated>(authRepository.authState.value)
+    }
+
+    @Test
+    fun testLogoutWithoutRefreshTokenClearsState() = runTest {
+        val session = authRepository.startPkceLogin()
+        fakeAuthApiService.tokenResponse = AuthTokenResponse(
+            accessToken = "access_token_123",
+            refreshToken = null,
+            idToken = sampleIdToken,
+            tokenType = "Bearer",
+            expiresIn = 86400
+        )
+        fakeAuthApiService.userProfileResponse = UserProfileDto(userId = "user_1")
+
+        authRepository.handleCallback(code = "code", state = session.state)
+        assertIs<AuthState.Authenticated>(authRepository.authState.value)
+
+        authRepository.logout()
+
+        assertEquals(null, fakeAuthApiService.revokedToken)
+        assertIs<AuthState.Unauthenticated>(authRepository.authState.value)
+    }
+
+    @Test
+    fun testLogoutClearsStateEvenWhenRevokeFails() = runTest {
+        val session = authRepository.startPkceLogin()
+        fakeAuthApiService.tokenResponse = AuthTokenResponse(
+            accessToken = "access_token_123",
+            refreshToken = "bad_token",
+            idToken = sampleIdToken,
+            tokenType = "Bearer",
+            expiresIn = 86400
+        )
+        fakeAuthApiService.revokeTokenError = IllegalStateException("Network timeout")
+        fakeAuthApiService.userProfileResponse = UserProfileDto(userId = "user_1")
+
+        authRepository.handleCallback(code = "code", state = session.state)
+        assertIs<AuthState.Authenticated>(authRepository.authState.value)
+
+        authRepository.logout()
+
+        assertIs<AuthState.Unauthenticated>(authRepository.authState.value)
+    }
+
     private class FakeAuthApiService : AuthApiService {
         var tokenResponse: AuthTokenResponse = AuthTokenResponse(
             accessToken = "token",
@@ -114,6 +182,8 @@ class AuthRepositoryTest {
         )
         var userProfileResponse: UserProfileDto = UserProfileDto(userId = "user_1")
         var fetchUserInfoError: Throwable? = null
+        var revokedToken: String? = null
+        var revokeTokenError: Throwable? = null
 
         override suspend fun exchangeCodeForToken(
             code: String,
@@ -126,8 +196,9 @@ class AuthRepositoryTest {
             return userProfileResponse
         }
 
-        override suspend fun logout(accessToken: String?): LogoutResponse {
-            return LogoutResponse(success = true, message = "Logged out")
+        override suspend fun revokeToken(refreshToken: String) {
+            revokeTokenError?.let { throw it }
+            revokedToken = refreshToken
         }
     }
 }

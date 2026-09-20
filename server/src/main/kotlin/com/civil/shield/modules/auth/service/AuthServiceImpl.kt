@@ -1,6 +1,5 @@
 package com.civil.shield.modules.auth.service
 
-import com.civil.shield.core.auth.LogoutResponse
 import com.civil.shield.shared.config.Auth0Properties
 import org.springframework.stereotype.Service
 
@@ -14,13 +13,6 @@ class AuthServiceImpl(
             "domain" to auth0Properties.domain,
             "clientId" to auth0Properties.clientId,
             "audience" to auth0Properties.audience
-        )
-    }
-
-    override fun logout(): LogoutResponse {
-        return LogoutResponse(
-            success = true,
-            message = "Logged out successfully"
         )
     }
 }

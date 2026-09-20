@@ -2,8 +2,8 @@ package com.civil.shield.features.main
 
 import com.civil.shield.auth.AuthApiService
 import com.civil.shield.auth.AuthRepository
+import com.civil.shield.auth.AuthState
 import com.civil.shield.core.auth.AuthTokenResponse
-import com.civil.shield.core.auth.LogoutResponse
 import com.civil.shield.core.auth.UserProfileDto
 import com.civil.shield.features.main.ui.MainUiAction
 import com.civil.shield.features.main.ui.MainViewModel
@@ -61,7 +61,7 @@ class MainViewModelTest {
         viewModel.onAction(MainUiAction.Logout)
         advanceUntilIdle()
 
-        assertEquals(1, fakeAuthApiService.logoutCallCount)
+        assertEquals(AuthState.Unauthenticated, authRepository.authState.value)
         assertEquals(listOf(AppDestination.Auth), navigator.backStack.value)
         assertEquals(AppDestination.Auth, navigator.currentDestination)
     }
@@ -89,7 +89,7 @@ class MainViewModelTest {
     }
 
     private class FakeAuthApiService : AuthApiService {
-        var logoutCallCount = 0
+        var revokeCallCount = 0
 
         override suspend fun exchangeCodeForToken(
             code: String,
@@ -112,9 +112,8 @@ class MainViewModelTest {
             )
         }
 
-        override suspend fun logout(accessToken: String?): LogoutResponse {
-            logoutCallCount++
-            return LogoutResponse(success = true, message = "Logged out")
+        override suspend fun revokeToken(refreshToken: String) {
+            revokeCallCount++
         }
     }
 }

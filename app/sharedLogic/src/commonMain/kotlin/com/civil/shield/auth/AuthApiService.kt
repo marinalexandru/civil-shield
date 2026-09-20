@@ -1,11 +1,10 @@
 package com.civil.shield.auth
 
 import com.civil.shield.core.auth.AuthTokenResponse
-import com.civil.shield.core.auth.LogoutResponse
 import com.civil.shield.core.auth.UserProfileDto
 
 /**
- * Service handling low-level network API requests for authentication, token exchange, user profile, and session termination.
+ * Service handling low-level network API requests for authentication, token exchange, user profile, and token revocation.
  */
 interface AuthApiService {
     suspend fun exchangeCodeForToken(
@@ -16,5 +15,5 @@ interface AuthApiService {
 
     suspend fun fetchUserInfo(accessToken: String): UserProfileDto
 
-    suspend fun logout(accessToken: String? = null): LogoutResponse
+    suspend fun revokeToken(refreshToken: String)
 }
